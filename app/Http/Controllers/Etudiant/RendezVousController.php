@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Etudiant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Disponibilite;
-use App\Models\Rendezvous;
+use App\Models\RendezVous;
 use App\Models\Service;
 use App\Mail\AppointmentCancelledByStudent;
 use Illuminate\Http\Request;
