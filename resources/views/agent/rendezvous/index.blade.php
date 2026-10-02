@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @if(session('success'))
-                <div class="p-4 bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 rounded-r-xl shadow-sm">
+                <div class="p-4 bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 rounded-r-xl shadow-sm font-bold">
                     {{ session('success') }}
                 </div>
             @endif
@@ -20,7 +20,7 @@
                     
                     <!-- Filtre par statut -->
                     <form method="GET" action="{{ route('agent.rendezvous.index') }}" class="flex items-center space-x-2">
-                        <select name="statut" onchange="this.form.submit()" class="text-xs rounded-xl border-slate-200 focus:ring-blue-500 focus:border-blue-500">
+                        <select name="statut" onchange="this.form.submit()" class="text-xs rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500">
                             <option value="">Tous les statuts</option>
                             <option value="confirme" {{ request('statut') === 'confirme' ? 'selected' : '' }}>Confirmé (en attente)</option>
                             <option value="termine" {{ request('statut') === 'termine' ? 'selected' : '' }}>Terminé</option>
@@ -82,12 +82,12 @@
                                                 <form action="{{ route('agent.rendezvous.update_statut', $rdv->id) }}" method="POST" class="inline-flex items-center space-x-2">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <select name="statut" class="text-xs rounded-lg border-slate-200 focus:ring-blue-500 focus:border-blue-500 py-1">
+                                                    <select name="statut" class="text-xs rounded-lg border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 py-1">
                                                         <option value="termine">Marquer Terminé</option>
                                                         <option value="absent">Marquer Absent</option>
                                                         <option value="annule">Annuler le RDV</option>
                                                     </select>
-                                                    <button type="submit" class="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition">
+                                                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition">
                                                         Valider
                                                     </button>
                                                 </form>

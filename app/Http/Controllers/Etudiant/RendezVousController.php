@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Disponibilite;
 use App\Models\Rendezvous;
 use App\Models\Service;
+use App\Mail\AppointmentCancelledByStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class RendezVousController extends Controller
 {
@@ -160,7 +162,7 @@ class RendezVousController extends Controller
     }
 
     /**
-     * Annulation du RDV.
+     * Annulation du RDV avec envoi de mail automatique.
      */
     public function annuler(Rendezvous $rendezvous)
     {
@@ -170,6 +172,14 @@ class RendezVousController extends Controller
 
         $rendezvous->update(['statut' => 'annule']);
 
-        return back()->with('success', 'Votre rendez-vous a été annulé avec succès. Vous pouvez à présent réserver un nouveau créneau.');
+        // Chargement des relations pour le mail
+        $rendezvous->load(['etudiant', 'agent', 'disponibilite']);
+
+        // Envoi automatique du mail de confirmation à l'étudiant
+        if ($rendezvous->etudiant && $rendezvous->etudiant->email) {
+            Mail::to($rendezvous->etudiant->email)->send(new AppointmentCancelledByStudent($rendezvous));
+        }
+
+        return back()->with('success', 'Votre rendez-vous a été annulé avec succès. Un e-mail de confirmation vous a été envoyé.');
     }
 }

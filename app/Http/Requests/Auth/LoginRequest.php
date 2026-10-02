@@ -13,6 +13,16 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
+     * Nombre maximal de tentatives autorisées.
+     */
+    protected int $maxAttempts = 5;
+
+    /**
+     * Durée du blocage en secondes (5 minutes = 300 secondes).
+     */
+    protected int $decaySeconds = 300;
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -43,13 +53,19 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+            // 1. Enregistre l'échec de la tentative
+            RateLimiter::hit($this->throttleKey(), $this->decaySeconds);
 
+            // 2. Calcule le nombre de tentatives restantes
+            $attemptsLeft = RateLimiter::remaining($this->throttleKey(), $this->maxAttempts);
+
+            // 3. Affiche le message d'erreur avec le nombre de tentatives restantes
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => "L'adresse e-mail ou le mot de passe est incorrect. Il vous reste {$attemptsLeft} tentative(s) avant un blocage de 5 minutes.",
             ]);
         }
 
+        // Réinitialise le compteur si la connexion réussit
         RateLimiter::clear($this->throttleKey());
     }
 
@@ -60,19 +76,17 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), $this->maxAttempts)) {
             return;
         }
 
         event(new Lockout($this));
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
+        $minutes = ceil($seconds / 60);
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => "Trop de tentatives de connexion. Votre compte est bloqué temporairement. Veuillez réessayer dans {$minutes} minute(s).",
         ]);
     }
 

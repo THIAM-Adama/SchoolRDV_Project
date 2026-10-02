@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force le HTTPS sur Railway ou en production
+        if ($this->app->environment('production') || config('app.url') !== 'http://127.0.0.1:8000') {
+            URL::forceScheme('https');
+        }
+
+        // Définit les règles de mot de passe fort pour toute l'application
+        Password::defaults(function () {
+            return Password::min(8)
+                ->mixedCase()   // Au moins 1 majuscule
+                ->numbers()     // Au moins 1 chiffre
+                ->symbols();    // Au moins 1 symbole (!@#$%^&*)
+        });
     }
 }

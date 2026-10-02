@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; }
-        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
-        .header { background-color: #4f46e5; padding: 24px; text-align: center; color: #ffffff; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 20px; }
+        .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .header { background-color: #059669; padding: 24px; text-align: center; color: #ffffff; }
         .content { padding: 30px; }
         .field { margin-bottom: 16px; }
-        .label { font-size: 12px; font-weight: bold; color: #6b7280; text-transform: uppercase; }
-        .value { font-size: 15px; color: #111827; font-weight: 500; margin-top: 4px; }
-        .message-box { background: #f9fafb; border-left: 4px solid #4f46e5; padding: 16px; margin-top: 20px; border-radius: 4px; }
+        .label { font-size: 12px; font-weight: bold; color: #64748b; text-transform: uppercase; }
+        .value { font-size: 15px; color: #0f172a; font-weight: 500; margin-top: 4px; }
+        .message-box { background: #f8fafc; border-left: 4px solid #059669; padding: 16px; margin-top: 20px; border-radius: 4px; }
     </style>
 </head>
 <body>
