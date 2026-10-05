@@ -13,7 +13,10 @@
                     <h3 class="text-2xl font-bold">Espace Agent : {{ auth()->user()->name }}</h3>
                     <p class="text-emerald-100 text-sm mt-1">Gérez vos disponibilités et traitez les rendez-vous reçus.</p>
                 </div>
-                <span class="px-4 py-2 bg-white/20 rounded-lg text-xs font-semibold uppercase tracking-wider backdrop-blur-md">Agent Administratif</span>
+                {{-- Badge dynamique : affiche "Agent [Nom du Service]" si rattaché --}}
+                <span class="px-4 py-2 bg-white/20 rounded-lg text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
+                    {{ auth()->user()->service ? 'Agent ' . (auth()->user()->service->nom ?? auth()->user()->service->name) : 'Agent Administratif' }}
+                </span>
             </div>
 
             <!-- Grille de navigation -->

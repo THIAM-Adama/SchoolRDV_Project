@@ -7,6 +7,7 @@ use App\Models\Disponibilite;
 use App\Models\RendezVous;
 use App\Models\Service;
 use App\Mail\AppointmentCancelledByStudent;
+use App\Mail\RendezVousConfirmeMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -40,9 +41,13 @@ class RendezVousController extends Controller
 
         $disponibilites = $query->get();
 
-        $mesRendezvous = Rendezvous::with(['disponibilite', 'agent'])
-            ->where('etudiant_id', Auth::id())
-            ->orderBy('created_at', 'desc')
+        // Tri chronologique : de la date la plus proche à la plus éloignée
+        $mesRendezvous = Rendezvous::select('rendez_vouses.*')
+            ->join('disponibilites', 'rendez_vouses.disponibilite_id', '=', 'disponibilites.id')
+            ->with(['disponibilite', 'agent'])
+            ->where('rendez_vouses.etudiant_id', Auth::id())
+            ->orderBy('disponibilites.date', 'asc')
+            ->orderBy('disponibilites.heure_debut', 'asc')
             ->get();
 
         $rendezVous = $mesRendezvous;
@@ -62,9 +67,13 @@ class RendezVousController extends Controller
      */
     public function mesRendezVous()
     {
-        $mesRendezvous = Rendezvous::with(['disponibilite', 'agent'])
-            ->where('etudiant_id', Auth::id())
-            ->orderBy('created_at', 'desc')
+        // Tri chronologique : de la date la plus proche à la plus éloignée
+        $mesRendezvous = Rendezvous::select('rendez_vouses.*')
+            ->join('disponibilites', 'rendez_vouses.disponibilite_id', '=', 'disponibilites.id')
+            ->with(['disponibilite', 'agent'])
+            ->where('rendez_vouses.etudiant_id', Auth::id())
+            ->orderBy('disponibilites.date', 'asc')
+            ->orderBy('disponibilites.heure_debut', 'asc')
             ->paginate(10);
 
         $rendezVous = $mesRendezvous;
@@ -108,10 +117,12 @@ class RendezVousController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $disponibilite) {
+        $rendezvous = null;
+
+        DB::transaction(function () use ($request, $disponibilite, &$rendezvous) {
             $agentId = $disponibilite->agent_id ?? $disponibilite->user_id;
 
-            Rendezvous::create([
+            $rendezvous = Rendezvous::create([
                 'etudiant_id'      => Auth::id(),
                 'agent_id'         => $agentId,
                 'disponibilite_id' => $disponibilite->id,
@@ -120,8 +131,17 @@ class RendezVousController extends Controller
             ]);
         });
 
+        // Envoi automatique du mail de confirmation à l'étudiant
+        if ($rendezvous) {
+            $rendezvous->load(['etudiant', 'agent', 'disponibilite']);
+
+            if ($rendezvous->etudiant && $rendezvous->etudiant->email) {
+                Mail::to($rendezvous->etudiant->email)->send(new RendezVousConfirmeMail($rendezvous));
+            }
+        }
+
         return redirect()->route('etudiant.rendezvous.index')
-            ->with('success', 'Votre rendez-vous a été confirmé avec succès !');
+            ->with('success', 'Votre rendez-vous a été confirmé avec succès ! Un e-mail de confirmation vous a été envoyé.');
     }
 
     /**

@@ -1,21 +1,31 @@
-<x-mail::message>
-# Annulation de votre rendez-vous
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Annulation de votre rendez-vous</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; background-color: #f8fafc; padding: 20px 0;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        
+        <h2 style="color: #dc2626; margin-top: 0;">Annulation de votre rendez-vous</h2>
 
-Bonjour **{{ $rendezvous->etudiant->name }}**,
+        <p>Bonjour <strong>{{ $rendezvous->etudiant->name ?? 'Étudiant' }}</strong>,</p>
 
-Nous vous confirmons que votre rendez-vous a bien été annulé à votre demande.
+        <p>Nous vous confirmons que votre rendez-vous sur <strong>SchoolRDV</strong> a bien été annulé à votre demande.</p>
 
-**Détails du créneau annulé :**
-- **Date :** {{ \Carbon\Carbon::parse($rendezvous->disponibilite->date_debut)->format('d/m/Y') }}
-- **Horaires :** {{ \Carbon\Carbon::parse($rendezvous->disponibilite->date_debut)->format('H:i') }} - {{ \Carbon\Carbon::parse($rendezvous->disponibilite->date_fin)->format('H:i') }}
-- **Agent concerné :** {{ $rendezvous->agent->name ?? 'Agent SchoolRDV' }}
+        <div style="background-color: #fef2f2; padding: 18px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ef4444;">
+            <p style="margin: 6px 0;">
+                <strong>Date & Heure :</strong> 
+                {{ \Carbon\Carbon::parse($rendezvous->disponibilite->date ?? $rendezvous->disponibilite->date_disponibilite)->format('d/m/Y') }} 
+                à {{ \Carbon\Carbon::parse($rendezvous->disponibilite->heure_debut)->format('H:i') }}
+            </p>
+            @if($rendezvous->agent)
+                <p style="margin: 6px 0;"><strong>Agent / Service :</strong> {{ $rendezvous->agent->name }}</p>
+            @endif
+        </div>
 
-Vous pouvez à tout moment reprendre un nouveau créneau disponible depuis votre espace.
+        <p>Vous pouvez à tout moment reprendre un nouveau créneau disponible depuis votre espace étudiant.</p>
 
-<x-mail::button :url="config('app.url') . '/login'">
-Accéder à mon espace SchoolRDV
-</x-mail::button>
-
-Cordialement,<br>
-L'équipe **{{ config('app.name') }}**
-</x-mail::message>
+    </div>
+</body>
+</html>

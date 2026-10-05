@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Agent;
 use App\Http\Controllers\Controller;
 use App\Models\Disponibilite;
 use App\Models\Rendezvous;
+use App\Mail\RendezVousAnnuleMail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class DisponibiliteController extends Controller
 {
@@ -55,14 +57,12 @@ class DisponibiliteController extends Controller
             'heure_debut' => 'required',
         ]);
 
-        // Calcul automatique de l'heure de fin (début + 30 minutes)
         $start = Carbon::parse($request->date . ' ' . $request->heure_debut);
         $end = $start->copy()->addMinutes(30);
 
         $heureDebutFormatted = $start->format('H:i:s');
         $heureFinFormatted   = $end->format('H:i:s');
 
-        // Vérification de chevauchement
         $exists = Disponibilite::where('agent_id', Auth::id())
             ->where('date', $request->date)
             ->where('heure_debut', $heureDebutFormatted)
@@ -157,7 +157,10 @@ class DisponibiliteController extends Controller
     {
         $agent = Auth::user();
 
-        $query = Rendezvous::with(['etudiant', 'disponibilite'])
+        // Tri chronologique : de la date la plus proche à la plus éloignée
+        $query = Rendezvous::select('rendez_vouses.*')
+            ->join('disponibilites', 'rendez_vouses.disponibilite_id', '=', 'disponibilites.id')
+            ->with(['etudiant', 'disponibilite'])
             ->whereHas('agent', function ($q) use ($agent) {
                 if ($agent->service_id) {
                     $q->where('service_id', $agent->service_id);
@@ -167,10 +170,12 @@ class DisponibiliteController extends Controller
             });
 
         if ($request->filled('statut')) {
-            $query->where('statut', $request->statut);
+            $query->where('rendez_vouses.statut', $request->statut);
         }
 
-        $rendezvous = $query->orderBy('created_at', 'desc')->paginate(10);
+        $rendezvous = $query->orderBy('disponibilites.date', 'asc')
+            ->orderBy('disponibilites.heure_debut', 'asc')
+            ->paginate(10);
 
         return view('agent.rendezvous.index', compact('rendezvous'));
     }
@@ -184,6 +189,15 @@ class DisponibiliteController extends Controller
         $rendezvous->update([
             'statut' => $request->statut,
         ]);
+
+        // Si l'agent choisit d'annuler, on envoie le mail d'annulation
+        if ($request->statut === 'annule') {
+            $rendezvous->load(['etudiant', 'disponibilite']);
+
+            if ($rendezvous->etudiant && $rendezvous->etudiant->email) {
+                Mail::to($rendezvous->etudiant->email)->send(new RendezVousAnnuleMail($rendezvous));
+            }
+        }
 
         return back()->with('success', 'Le statut du rendez-vous a été mis à jour.');
     }

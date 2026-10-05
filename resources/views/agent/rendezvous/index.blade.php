@@ -18,7 +18,6 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h3 class="text-lg font-bold text-slate-900">Demandes de rendez-vous récents</h3>
                     
-                    <!-- Filtre par statut -->
                     <form method="GET" action="{{ route('agent.rendezvous.index') }}" class="flex items-center space-x-2">
                         <select name="statut" onchange="this.form.submit()" class="text-xs rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500">
                             <option value="">Tous les statuts</option>
@@ -52,7 +51,6 @@
                                             <div class="text-xs font-normal text-slate-500">{{ $rdv->etudiant->email ?? '' }}</div>
                                         </td>
                                         
-                                        {{-- Date & Heure du créneau réservé --}}
                                         <td class="p-3 font-medium text-slate-800">
                                             @php
                                                 $dateRdv = $rdv->disponibilite->date_disponibilite ?? $rdv->disponibilite->date ?? null;
