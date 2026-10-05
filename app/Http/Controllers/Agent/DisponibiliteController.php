@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Agent;
 
 use App\Http\Controllers\Controller;
 use App\Models\Disponibilite;
-use App\Models\Rendezvous;
+use App\Models\RendezVous;
 use App\Mail\RendezVousAnnuleMail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -158,7 +158,7 @@ class DisponibiliteController extends Controller
         $agent = Auth::user();
 
         // Tri chronologique : de la date la plus proche à la plus éloignée
-        $query = Rendezvous::select('rendez_vouses.*')
+        $query = RendezVous::select('rendez_vouses.*')
             ->join('disponibilites', 'rendez_vouses.disponibilite_id', '=', 'disponibilites.id')
             ->with(['etudiant', 'disponibilite'])
             ->whereHas('agent', function ($q) use ($agent) {
