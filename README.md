@@ -51,5 +51,4 @@ Le projet a été mené en suivant une méthodologie de conception logicielle co
 
 1. **Cloner le projet :**
    ```bash
-   git clone [https://github.com/THIAM-Adama/SchoolRDV_Project.git](https://github.com/THIAM-Adama/SchoolRDV_Project.git)
-   cd SchoolRDV_Project
+   git clone https://github.com/THIAM-Adama/SchoolRDV_Project.git
